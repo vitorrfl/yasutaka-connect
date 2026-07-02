@@ -1,0 +1,16 @@
+export const UNIT_OPTIONS = [
+  { value: "un", label: "Unidade (un)" },
+  { value: "par", label: "Par" },
+  { value: "cx", label: "Caixa (cx)" },
+  { value: "pct", label: "Pacote (pct)" },
+  { value: "resma", label: "Resma" },
+  { value: "rolo", label: "Rolo" },
+  { value: "folha", label: "Folha" },
+  { value: "m", label: "Metro (m)" },
+  { value: "m2", label: "Metro quadrado (m²)" },
+  { value: "cm", label: "Centímetro (cm)" },
+  { value: "kg", label: "Quilograma (kg)" },
+  { value: "g", label: "Grama (g)" },
+  { value: "l", label: "Litro (l)" },
+  { value: "ml", label: "Mililitro (ml)" },
+] as const;

@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { Table, type TableColumn } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
 import type { ProductJSON } from "@/domain/entities/Product";
+import { UNIT_OPTIONS } from "@/lib/units";
 import {
   createProductAction,
   addVariantAction,
@@ -40,10 +42,10 @@ export function ProductsClient({ products }: ProductsClientProps) {
   }
 
   const columns: TableColumn<ProductJSON>[] = [
-    { header: "Produto", cell: (p) => <span className="font-medium">{p.name}</span> },
+    { header: "Categoria", cell: (p) => <span className="font-medium">{p.name}</span> },
     { header: "Unidade", cell: (p) => p.unit },
     {
-      header: "Variações",
+      header: "Itens",
       cell: (p) => (
         <div className="flex flex-wrap gap-1">
           {p.variants.map((v) => (
@@ -81,12 +83,12 @@ export function ProductsClient({ products }: ProductsClientProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-end">
-        <Button onClick={() => setNewProductOpen(true)}>+ Novo Produto</Button>
+        <Button onClick={() => setNewProductOpen(true)}>+ Nova Categoria</Button>
       </div>
 
-      <Table data={products} columns={columns} getRowKey={(p) => p.id} emptyMessage="Nenhum produto cadastrado ainda" />
+      <Table data={products} columns={columns} getRowKey={(p) => p.id} emptyMessage="Nenhuma categoria cadastrada ainda" />
 
-      <Modal isOpen={isNewProductOpen} onClose={closeNewProductModal} title="Novo Produto">
+      <Modal isOpen={isNewProductOpen} onClose={closeNewProductModal} title="Nova Categoria">
         <form
           action={(fd) => {
             startTransition(async () => {
@@ -96,30 +98,30 @@ export function ProductsClient({ products }: ProductsClientProps) {
           }}
           className="flex flex-col gap-4"
         >
-          <FormField label="Nome do produto" htmlFor="name">
-            <Input id="name" name="name" placeholder="Ex: Copo Stanley" required />
+          <FormField label="Categoria" htmlFor="name">
+            <Input id="name" name="name" placeholder="Ex: Copo Stanley, Carimbo..." required />
           </FormField>
           <FormField label="Unidade" htmlFor="unit">
-            <Input id="unit" name="unit" placeholder="un, cx, par..." defaultValue="un" />
+            <Select id="unit" name="unit" defaultValue="un" options={UNIT_OPTIONS} />
           </FormField>
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium text-slate-700">
-              Variações (cores, modelos...) — deixe em branco se não houver
+              Itens dessa categoria (ex: Printer 10, Copo Azul...) — deixe em branco se não houver
             </span>
             {Array.from({ length: variantRowCount }).map((_, i) => (
-              <div key={i} className="flex gap-2">
-                <Input name="variantName" placeholder="Ex: Azul" />
-                <Input name="variantQuantity" type="number" min={0} defaultValue={0} className="w-28" />
+              <div key={i} className="flex flex-col gap-2 sm:flex-row">
+                <Input name="variantName" placeholder="Ex: Printer 10" />
+                <Input name="variantQuantity" type="number" min={0} defaultValue={0} className="sm:w-28" />
               </div>
             ))}
             <Button type="button" variant="ghost" size="sm" onClick={() => setVariantRowCount((n) => n + 1)}>
-              + Adicionar variação
+              + Adicionar item
             </Button>
           </div>
 
           <Button type="submit" isLoading={isPending}>
-            Salvar produto
+            Salvar categoria
           </Button>
         </form>
       </Modal>
@@ -127,7 +129,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
       <Modal
         isOpen={!!managingProduct}
         onClose={() => setManagingProductId(null)}
-        title={managingProduct ? `Variações de ${managingProduct.name}` : undefined}
+        title={managingProduct ? `Itens de ${managingProduct.name}` : undefined}
       >
         {managingProduct && (
           <div className="flex flex-col gap-4">
@@ -139,10 +141,10 @@ export function ProductsClient({ products }: ProductsClientProps) {
                   fd.set("variantId", v.id);
                   startTransition(() => adjustVariantQuantityAction(fd));
                 }}
-                className="flex items-center gap-2"
+                className="flex flex-wrap items-center gap-2"
               >
-                <span className="flex-1 text-sm">{v.name}</span>
-                <Input name="quantity" type="number" min={0} defaultValue={v.quantity} className="w-24" />
+                <span className="min-w-0 flex-1 truncate text-sm">{v.name}</span>
+                <Input name="quantity" type="number" min={0} defaultValue={v.quantity} className="w-20 sm:w-24" />
                 <Button size="sm" type="submit" isLoading={isPending}>
                   Salvar
                 </Button>
@@ -167,13 +169,13 @@ export function ProductsClient({ products }: ProductsClientProps) {
                 fd.set("productId", managingProduct.id);
                 startTransition(() => addVariantAction(fd));
               }}
-              className="flex items-end gap-2 border-t border-slate-200 pt-4"
+              className="flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:items-end"
             >
-              <FormField label="Nova variação" htmlFor="newVariantName">
-                <Input id="newVariantName" name="name" placeholder="Ex: Verde" required />
+              <FormField label="Novo item" htmlFor="newVariantName">
+                <Input id="newVariantName" name="name" placeholder="Ex: Printer 20" required />
               </FormField>
               <FormField label="Quantidade" htmlFor="newVariantQty">
-                <Input id="newVariantQty" name="quantity" type="number" min={0} defaultValue={0} className="w-24" />
+                <Input id="newVariantQty" name="quantity" type="number" min={0} defaultValue={0} className="sm:w-24" />
               </FormField>
               <Button type="submit" isLoading={isPending}>
                 Adicionar

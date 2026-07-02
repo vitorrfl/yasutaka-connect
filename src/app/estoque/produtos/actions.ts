@@ -14,7 +14,8 @@ export async function createProductAction(formData: FormData) {
     .filter((v) => v.name.trim().length > 0);
 
   await productService.createProduct({ name, unit, variants });
-  revalidatePath("/produtos");
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
 }
 
 export async function addVariantAction(formData: FormData) {
@@ -22,7 +23,8 @@ export async function addVariantAction(formData: FormData) {
   const name = String(formData.get("name"));
   const quantity = Number(formData.get("quantity") ?? 0);
   await productService.addVariant(productId, { name, quantity });
-  revalidatePath("/produtos");
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
 }
 
 export async function adjustVariantQuantityAction(formData: FormData) {
@@ -30,18 +32,21 @@ export async function adjustVariantQuantityAction(formData: FormData) {
   const variantId = String(formData.get("variantId"));
   const quantity = Number(formData.get("quantity"));
   await productService.adjustVariantQuantity(productId, variantId, quantity);
-  revalidatePath("/produtos");
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
 }
 
 export async function removeVariantAction(formData: FormData) {
   const productId = String(formData.get("productId"));
   const variantId = String(formData.get("variantId"));
   await productService.removeVariant(productId, variantId);
-  revalidatePath("/produtos");
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
 }
 
 export async function deleteProductAction(formData: FormData) {
   const productId = String(formData.get("productId"));
   await productService.deleteProduct(productId);
-  revalidatePath("/produtos");
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
 }
