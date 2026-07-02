@@ -38,14 +38,21 @@ export function MateriaPrimaClient({ materials }: MateriaPrimaClientProps) {
     },
     {
       header: "Ações",
+      hideLabelOnMobile: true,
       cell: (m) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="secondary" onClick={() => setManagingMaterialId(m.id)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="flex-1 md:flex-none"
+            onClick={() => setManagingMaterialId(m.id)}
+          >
             Ajustar
           </Button>
           <Button
             size="sm"
             variant="danger"
+            className="flex-1 md:flex-none"
             onClick={() => {
               const fd = new FormData();
               fd.set("materialId", m.id);

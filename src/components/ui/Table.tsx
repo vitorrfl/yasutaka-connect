@@ -5,6 +5,8 @@ export interface TableColumn<T> {
   header: string;
   cell: (row: T) => ReactNode;
   className?: string;
+  /** Hide this column's label on the mobile card (e.g. actions rows). */
+  hideLabelOnMobile?: boolean;
 }
 
 interface TableProps<T> {
@@ -20,29 +22,48 @@ export function Table<T>({ data, columns, getRowKey, emptyMessage = "Nenhum regi
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-slate-200">
-      <table className="w-full text-sm">
-        <thead className="bg-slate-50 text-left text-slate-600">
-          <tr>
+    <>
+      {/* Mobile: stacked cards */}
+      <ul className="flex flex-col gap-3 md:hidden">
+        {data.map((row) => (
+          <li key={getRowKey(row)} className="flex flex-col gap-3 rounded-md border border-slate-200 p-4">
             {columns.map((col, i) => (
-              <th key={i} className="px-4 py-2 font-medium">
-                {col.header}
-              </th>
+              <div key={i} className="flex flex-col gap-1">
+                {!col.hideLabelOnMobile && (
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{col.header}</span>
+                )}
+                <div className="min-w-0 text-sm">{col.cell(row)}</div>
+              </div>
             ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {data.map((row) => (
-            <tr key={getRowKey(row)} className="hover:bg-slate-50">
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop: table */}
+      <div className="hidden overflow-x-auto rounded-md border border-slate-200 md:block">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-left text-slate-600">
+            <tr>
               {columns.map((col, i) => (
-                <td key={i} className={cn("px-4 py-2", col.className)}>
-                  {col.cell(row)}
-                </td>
+                <th key={i} className="px-4 py-2 font-medium">
+                  {col.header}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {data.map((row) => (
+              <tr key={getRowKey(row)} className="hover:bg-slate-50">
+                {columns.map((col, i) => (
+                  <td key={i} className={cn("px-4 py-2", col.className)}>
+                    {col.cell(row)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
