@@ -167,21 +167,35 @@ export function ProductsClient({ products }: ProductsClientProps) {
           }}
           className="flex flex-col gap-4"
         >
-          <FormField label="Categoria" htmlFor="name">
-            <Input id="name" name="name" placeholder="Ex: Copo Stanley, Carimbo..." required />
+          <FormField label="Nome da categoria" htmlFor="name">
+            <Input id="name" name="name" placeholder="Ex: Copo Stanley, Carimbo…" required />
           </FormField>
-          <FormField label="Unidade" htmlFor="unit">
+          <FormField label="Unidade de medida" htmlFor="unit">
             <Select id="unit" name="unit" defaultValue="un" options={UNIT_OPTIONS} />
           </FormField>
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-slate-700">
-              Itens dessa categoria (ex: Printer 10, Copo Azul...) — deixe em branco se não houver
-            </span>
+            <div>
+              <span className="text-sm font-medium text-slate-700">Itens</span>
+              <p className="text-xs text-slate-500">Opcional — cada variação com sua quantidade atual.</p>
+            </div>
+            {variantRowCount > 0 && (
+              <div className="flex gap-2 px-0.5 text-xs font-medium text-slate-400">
+                <span className="flex-1">Item</span>
+                <span className="w-20 shrink-0">Qtd.</span>
+              </div>
+            )}
             {Array.from({ length: variantRowCount }).map((_, i) => (
-              <div key={i} className="flex flex-col gap-2 sm:flex-row">
-                <Input name="variantName" placeholder="Ex: Printer 10" />
-                <Input name="variantQuantity" type="number" min={0} defaultValue={0} className="sm:w-28" />
+              <div key={i} className="flex items-center gap-2">
+                <Input name="variantName" placeholder="Ex: Printer 10" className="flex-1" />
+                <Input
+                  name="variantQuantity"
+                  type="number"
+                  min={0}
+                  defaultValue={0}
+                  aria-label="Quantidade"
+                  className="w-20 shrink-0"
+                />
               </div>
             ))}
             <Button type="button" variant="ghost" size="sm" onClick={() => setVariantRowCount((n) => n + 1)}>
