@@ -22,6 +22,18 @@ function CloseIcon(props: SVGProps<SVGSVGElement>) {
 
 const EXIT_MS = 300;
 
+// Scroll lock contado por referência: com modais empilhados (ex.: uma confirmação
+// por cima do modal de gerenciar), o body só volta a rolar quando o último fecha.
+let lockCount = 0;
+function lockBodyScroll() {
+  if (lockCount === 0) document.body.style.overflow = "hidden";
+  lockCount += 1;
+}
+function unlockBodyScroll() {
+  lockCount = Math.max(0, lockCount - 1);
+  if (lockCount === 0) document.body.style.overflow = "";
+}
+
 export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
   // "mounted" keeps the portal in the DOM through the exit animation;
   // "visible" drives the open/closed styles so both directions transition.
@@ -74,10 +86,10 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
       if (e.key === "Escape") requestClose();
     }
     document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
+      unlockBodyScroll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);

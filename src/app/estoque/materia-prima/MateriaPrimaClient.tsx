@@ -8,6 +8,7 @@ import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { Table, type TableColumn } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { RawMaterialJSON } from "@/domain/entities/RawMaterial";
 import { createMaterialAction, adjustMaterialQuantityAction, deleteMaterialAction } from "./actions";
 import { UNIT_OPTIONS } from "@/lib/units";
@@ -26,6 +27,7 @@ export function MateriaPrimaClient({ materials }: MateriaPrimaClientProps) {
   const [isNewOpen, setNewOpen] = useState(false);
   const [managingMaterialId, setManagingMaterialId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { confirm, dialog: confirmDialog } = useConfirm();
 
   const managingMaterial = materials.find((m) => m.id === managingMaterialId) ?? null;
 
@@ -53,7 +55,16 @@ export function MateriaPrimaClient({ materials }: MateriaPrimaClientProps) {
             size="sm"
             variant="danger"
             className="flex-1 md:flex-none"
-            onClick={() => {
+            onClick={async () => {
+              const ok = await confirm({
+                title: "Excluir matéria-prima",
+                description: (
+                  <>
+                    Tem certeza que deseja excluir <strong>{m.name}</strong>? Essa ação não pode ser desfeita.
+                  </>
+                ),
+              });
+              if (!ok) return;
               const fd = new FormData();
               fd.set("materialId", m.id);
               startTransition(() => deleteMaterialAction(fd));
@@ -129,6 +140,8 @@ export function MateriaPrimaClient({ materials }: MateriaPrimaClientProps) {
           </form>
         )}
       </Modal>
+
+      {confirmDialog}
     </div>
   );
 }
