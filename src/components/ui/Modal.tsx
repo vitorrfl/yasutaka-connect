@@ -106,7 +106,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
       />
       <div
         className={cn(
-          "relative flex max-h-[90vh] w-full flex-col overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl transition-all duration-300 ease-out sm:max-w-md sm:rounded-lg",
+          "relative flex max-h-[90vh] w-full flex-col rounded-t-2xl bg-white shadow-xl transition-all duration-300 ease-out sm:max-w-md sm:rounded-lg",
           visible
             ? "translate-y-0 opacity-100 sm:scale-100"
             : "translate-y-full opacity-0 sm:translate-y-4 sm:scale-95",
@@ -115,31 +115,37 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
         role="dialog"
         aria-modal="true"
       >
-        {/* Grabber — reforça o gesto de "puxar de baixo" no mobile */}
-        <div className="mx-auto mb-4 h-1.5 w-10 shrink-0 rounded-full bg-slate-200 sm:hidden" />
+        {/* Cabeçalho fixo — fora da área de scroll, pra a barra não cruzar o canto/X */}
+        <div className="shrink-0 px-6 pt-6">
+          {/* Grabber — reforça o gesto de "puxar de baixo" no mobile */}
+          <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-200 sm:hidden" />
 
-        <div className="mb-4 flex items-start justify-between gap-4">
-          {shownTitle ? (
-            <h2 className="text-lg font-semibold text-slate-900">{shownTitle}</h2>
-          ) : (
-            <span />
-          )}
-          <button
-            type="button"
-            aria-label="Fechar"
-            onClick={requestClose}
-            className="group -mr-1.5 -mt-1.5 shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-          >
-            <CloseIcon
-              className={cn(
-                "transition-transform duration-150 group-hover:rotate-45",
-                closingIcon ? "rotate-45" : "rotate-0"
-              )}
-            />
-          </button>
+          <div className="flex items-start justify-between gap-4">
+            {shownTitle ? (
+              <h2 className="text-lg font-semibold text-slate-900">{shownTitle}</h2>
+            ) : (
+              <span />
+            )}
+            <button
+              type="button"
+              aria-label="Fechar"
+              onClick={requestClose}
+              className="group -mr-1.5 -mt-1.5 shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            >
+              <CloseIcon
+                className={cn(
+                  "transition-transform duration-150 group-hover:rotate-45",
+                  closingIcon ? "rotate-45" : "rotate-0"
+                )}
+              />
+            </button>
+          </div>
         </div>
 
-        {shownChildren}
+        {/* Só o corpo rola */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 pt-4 [scrollbar-width:thin]">
+          {shownChildren}
+        </div>
       </div>
     </div>,
     document.body
