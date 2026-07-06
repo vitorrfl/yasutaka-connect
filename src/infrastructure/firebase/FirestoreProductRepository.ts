@@ -44,6 +44,9 @@ export class FirestoreProductRepository implements ProductRepository {
       {
         name: data.name,
         unit: data.unit,
+        // Docs antigos (pré-categorias) não têm esses campos → caem em "Sem categoria".
+        categoryId: (data.categoryId as string | null) ?? null,
+        variationLabel: (data.variationLabel as string | null) ?? undefined,
         variants,
         createdAt: (data.createdAt as Timestamp)?.toDate() ?? new Date(),
         updatedAt: (data.updatedAt as Timestamp)?.toDate() ?? new Date(),
@@ -57,6 +60,8 @@ export class FirestoreProductRepository implements ProductRepository {
     return {
       name: json.name,
       unit: json.unit,
+      categoryId: json.categoryId,
+      variationLabel: json.variationLabel,
       variants: json.variants,
       createdAt: Timestamp.fromDate(product.createdAt),
       updatedAt: Timestamp.fromDate(product.updatedAt),

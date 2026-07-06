@@ -12,12 +12,27 @@ export class ProductService {
   async createProduct(input: {
     name: string;
     unit?: string;
+    categoryId?: string | null;
+    variationLabel?: string;
     variants?: { name: string; quantity: number }[];
   }): Promise<Product> {
     const variants = (input.variants ?? [])
       .filter((v) => v.name.trim().length > 0)
       .map((v) => ProductVariant.create(v));
-    const product = Product.create({ name: input.name, unit: input.unit, variants });
+    const product = Product.create({
+      name: input.name,
+      unit: input.unit,
+      categoryId: input.categoryId,
+      variationLabel: input.variationLabel,
+      variants,
+    });
+    await this.repository.save(product);
+    return product;
+  }
+
+  async moveProductToCategory(productId: string, categoryId: string | null): Promise<Product> {
+    const product = await this.getOrThrow(productId);
+    product.moveToCategory(categoryId);
     await this.repository.save(product);
     return product;
   }
