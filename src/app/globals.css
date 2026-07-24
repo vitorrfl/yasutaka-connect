@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
+  /* slate-100: a "mesa" um tom mais escura que os cards brancos, pra eles flutuarem */
+  --background: #f1f5f9;
   --foreground: #0f172a;
 }
 
@@ -16,4 +17,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  /* Elevação suave: card branco flutuando sobre a "mesa" slate-100.
+     Reutilize .shadow-card em qualquer card pra manter o visual em sincronia. */
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 2px 8px rgba(15, 23, 42, 0.06);
+  }
+  .shadow-card-hover {
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.05),
+      0 10px 24px rgba(15, 23, 42, 0.1);
+  }
 }

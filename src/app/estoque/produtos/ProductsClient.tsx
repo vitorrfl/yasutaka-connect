@@ -73,8 +73,8 @@ function ProductCard({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg border bg-white transition-shadow",
-        open ? "border-slate-300 shadow-sm" : "border-slate-200 hover:shadow-sm"
+        "overflow-hidden rounded-lg border bg-white transition-all",
+        open ? "border-slate-300 shadow-card" : "border-slate-200/80 hover:border-slate-300 hover:shadow-card"
       )}
     >
       <button
@@ -156,7 +156,7 @@ function CategorySection({
   const [open, setOpen] = useState(true);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-slate-50/60">
+    <section className="rounded-xl border border-slate-200/70 bg-white shadow-card">
       <div className="flex items-center gap-2 px-3 py-2.5 sm:px-4">
         <button
           type="button"

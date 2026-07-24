@@ -26,7 +26,7 @@ export function Table<T>({ data, columns, getRowKey, emptyMessage = "Nenhum regi
       {/* Mobile: stacked cards */}
       <ul className="flex flex-col gap-3 md:hidden">
         {data.map((row) => (
-          <li key={getRowKey(row)} className="flex flex-col gap-3 rounded-md border border-slate-200 p-4">
+          <li key={getRowKey(row)} className="flex flex-col gap-3 rounded-xl border border-slate-200/70 bg-white p-4 shadow-card">
             {columns.map((col, i) => (
               <div key={i} className="flex flex-col gap-1">
                 {!col.hideLabelOnMobile && (
@@ -40,7 +40,7 @@ export function Table<T>({ data, columns, getRowKey, emptyMessage = "Nenhum regi
       </ul>
 
       {/* Desktop: table */}
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 md:block">
+      <div className="hidden overflow-x-auto rounded-xl border border-slate-200/70 bg-white shadow-card md:block">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-slate-600">
             <tr>
