@@ -4,6 +4,8 @@ export interface ProductVariantProps {
   name: string;
   sku?: string;
   quantity: number;
+  /** Preço de venda em centavos (inteiro). 0 = sem preço definido ainda. */
+  price: number;
 }
 
 export type ProductVariantJSON = {
@@ -11,6 +13,8 @@ export type ProductVariantJSON = {
   name: string;
   quantity: number;
   sku: string | null;
+  /** Preço de venda em centavos. */
+  price: number;
 };
 
 export class ProductVariant extends Entity<ProductVariantProps> {
@@ -19,7 +23,7 @@ export class ProductVariant extends Entity<ProductVariantProps> {
   }
 
   static create(
-    input: { name: string; quantity?: number; sku?: string },
+    input: { name: string; quantity?: number; sku?: string; price?: number },
     id?: string
   ): ProductVariant {
     const name = input.name?.trim();
@@ -30,8 +34,12 @@ export class ProductVariant extends Entity<ProductVariantProps> {
     if (quantity < 0) {
       throw new Error("Quantidade não pode ser negativa");
     }
+    const price = input.price ?? 0;
+    if (price < 0) {
+      throw new Error("Preço não pode ser negativo");
+    }
     return new ProductVariant(
-      { name, quantity, sku: input.sku?.trim() || undefined },
+      { name, quantity, sku: input.sku?.trim() || undefined, price: Math.round(price) },
       id ?? crypto.randomUUID()
     );
   }
@@ -48,10 +56,21 @@ export class ProductVariant extends Entity<ProductVariantProps> {
     return this.props.sku;
   }
 
+  /** Preço de venda em centavos. */
+  get price(): number {
+    return this.props.price;
+  }
+
   rename(name: string): void {
     const trimmed = name.trim();
     if (!trimmed) throw new Error("Nome da variação é obrigatório");
     this.props.name = trimmed;
+  }
+
+  /** Define o preço de venda (em centavos). */
+  setPrice(price: number): void {
+    if (price < 0) throw new Error("Preço não pode ser negativo");
+    this.props.price = Math.round(price);
   }
 
   increment(amount: number): void {
@@ -80,6 +99,7 @@ export class ProductVariant extends Entity<ProductVariantProps> {
       name: this.props.name,
       quantity: this.props.quantity,
       sku: this.props.sku ?? null,
+      price: this.props.price,
     };
   }
 }

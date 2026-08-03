@@ -10,6 +10,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Badge } from "@/components/ui/Badge";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { cn } from "@/lib/utils";
+import { centsToInput } from "@/lib/money";
 import type { ProductJSON } from "@/domain/entities/Product";
 import type { CategoryJSON } from "@/domain/entities/Category";
 import { UNIT_OPTIONS } from "@/lib/units";
@@ -18,7 +19,7 @@ import {
   deleteCategoryAction,
   createProductAction,
   addVariantAction,
-  adjustVariantQuantityAction,
+  updateVariantAction,
   removeVariantAction,
   deleteProductAction,
 } from "./actions";
@@ -447,24 +448,32 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
           <div className="flex flex-col gap-2">
             <div>
               <span className="text-sm font-medium text-slate-700">Variações</span>
-              <p className="text-xs text-slate-500">Cada variação com sua quantidade atual em estoque.</p>
+              <p className="text-xs text-slate-500">Cada variação com sua quantidade em estoque e preço de venda.</p>
             </div>
             {variantRowCount > 0 && (
               <div className="flex gap-2 px-0.5 text-xs font-medium text-slate-400">
                 <span className="flex-1">Variação</span>
-                <span className="w-20 shrink-0">Qtd.</span>
+                <span className="w-14 shrink-0 text-center">Qtd.</span>
+                <span className="w-24 shrink-0 text-right">Preço R$</span>
               </div>
             )}
             {Array.from({ length: variantRowCount }).map((_, i) => (
               <div key={i} className="flex items-center gap-2">
-                <Input name="variantName" placeholder="Ex: 5x7, Preto, Printer 10…" className="flex-1" />
+                <Input name="variantName" placeholder="Ex: 5x7, Preto…" className="min-w-0 flex-1" />
                 <Input
                   name="variantQuantity"
                   type="number"
                   min={0}
                   defaultValue={0}
                   aria-label="Quantidade"
-                  className="w-20 shrink-0"
+                  className="w-14 shrink-0"
+                />
+                <Input
+                  name="variantPrice"
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  aria-label="Preço"
+                  className="w-24 shrink-0 text-right"
                 />
               </div>
             ))}
@@ -498,12 +507,28 @@ export function ProductsClient({ products, categories }: ProductsClientProps) {
                 action={(fd) => {
                   fd.set("productId", managingProduct.id);
                   fd.set("variantId", v.id);
-                  startTransition(() => adjustVariantQuantityAction(fd));
+                  startTransition(() => updateVariantAction(fd));
                 }}
                 className="flex flex-wrap items-center gap-2"
               >
-                <span className="min-w-0 flex-1 truncate text-sm">{v.name}</span>
-                <Input name="quantity" type="number" min={0} defaultValue={v.quantity} className="w-20 sm:w-24" />
+                <span className="w-full truncate text-sm font-medium text-slate-800 sm:w-auto sm:min-w-0 sm:flex-1">
+                  {v.name}
+                </span>
+                <label className="flex items-center gap-1 text-xs text-slate-400">
+                  Qtd.
+                  <Input name="quantity" type="number" min={0} defaultValue={v.quantity} aria-label="Quantidade" className="w-16" />
+                </label>
+                <label className="flex items-center gap-1 text-xs text-slate-400">
+                  R$
+                  <Input
+                    name="price"
+                    inputMode="decimal"
+                    defaultValue={centsToInput(v.price)}
+                    placeholder="0,00"
+                    aria-label="Preço"
+                    className="w-20 text-right"
+                  />
+                </label>
                 <Button size="sm" type="submit" isLoading={isPending}>
                   Salvar
                 </Button>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { productService, categoryService } from "@/lib/container";
+import { parseBRLToCents } from "@/lib/money";
 
 export async function createCategoryAction(formData: FormData) {
   const name = String(formData.get("name") ?? "");
@@ -32,9 +33,14 @@ export async function createProductAction(formData: FormData) {
   const variationLabel = String(formData.get("variationLabel") ?? "");
   const variantNames = formData.getAll("variantName") as string[];
   const variantQuantities = formData.getAll("variantQuantity") as string[];
+  const variantPrices = formData.getAll("variantPrice") as string[];
 
   const variants = variantNames
-    .map((vName, i) => ({ name: vName, quantity: Number(variantQuantities[i] ?? 0) }))
+    .map((vName, i) => ({
+      name: vName,
+      quantity: Number(variantQuantities[i] ?? 0),
+      price: parseBRLToCents(variantPrices[i] ?? ""),
+    }))
     .filter((v) => v.name.trim().length > 0);
 
   await productService.createProduct({ name, unit, categoryId, variationLabel, variants });
@@ -54,7 +60,17 @@ export async function addVariantAction(formData: FormData) {
   const productId = String(formData.get("productId"));
   const name = String(formData.get("name"));
   const quantity = Number(formData.get("quantity") ?? 0);
-  await productService.addVariant(productId, { name, quantity });
+  const price = parseBRLToCents(String(formData.get("price") ?? ""));
+  await productService.addVariant(productId, { name, quantity, price });
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
+}
+
+export async function setVariantPriceAction(formData: FormData) {
+  const productId = String(formData.get("productId"));
+  const variantId = String(formData.get("variantId"));
+  const price = parseBRLToCents(String(formData.get("price") ?? ""));
+  await productService.setVariantPrice(productId, variantId, price);
   revalidatePath("/estoque/produtos");
   revalidatePath("/estoque");
 }
@@ -64,6 +80,18 @@ export async function adjustVariantQuantityAction(formData: FormData) {
   const variantId = String(formData.get("variantId"));
   const quantity = Number(formData.get("quantity"));
   await productService.adjustVariantQuantity(productId, variantId, quantity);
+  revalidatePath("/estoque/produtos");
+  revalidatePath("/estoque");
+}
+
+/** Salva quantidade e preço de uma variação de uma vez (usado no "Gerenciar produto"). */
+export async function updateVariantAction(formData: FormData) {
+  const productId = String(formData.get("productId"));
+  const variantId = String(formData.get("variantId"));
+  const quantity = Number(formData.get("quantity"));
+  const price = parseBRLToCents(String(formData.get("price") ?? ""));
+  await productService.adjustVariantQuantity(productId, variantId, quantity);
+  await productService.setVariantPrice(productId, variantId, price);
   revalidatePath("/estoque/produtos");
   revalidatePath("/estoque");
 }
