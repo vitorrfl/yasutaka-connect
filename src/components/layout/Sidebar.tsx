@@ -75,6 +75,26 @@ function MovimentacoesIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function PdvIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3 3h2l2.4 12.5a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 7H6" />
+      <circle cx="9" cy="20" r="1" />
+      <circle cx="18" cy="20" r="1" />
+    </svg>
+  );
+}
+
+function NovaVendaIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M12 12v6M9 15h6" />
+    </svg>
+  );
+}
+
 function ChevronIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -100,6 +120,11 @@ interface NavGroup {
 }
 
 const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "PDV",
+    icon: PdvIcon,
+    items: [{ href: "/pdv", label: "Nova venda", icon: NovaVendaIcon }],
+  },
   {
     label: "Estoque",
     icon: EstoqueIcon,
@@ -231,7 +256,7 @@ export function Sidebar() {
   return (
     <>
       {/* Barra superior — só no mobile */}
-      <header className="flex h-14 items-center justify-between bg-slate-900 px-4 md:hidden">
+      <header className="flex h-14 items-center justify-between bg-slate-900 px-4 md:hidden print:hidden">
         <Brand />
         <button
           type="button"
@@ -291,7 +316,7 @@ export function Sidebar() {
       {/* Painel fixo — desktop, retrátil */}
       <aside
         className={cn(
-          "hidden shrink-0 flex-col bg-slate-900 transition-[width] duration-200 md:flex",
+          "hidden shrink-0 flex-col bg-slate-900 transition-[width] duration-200 md:flex print:hidden",
           collapsed ? "w-16" : "w-60"
         )}
       >

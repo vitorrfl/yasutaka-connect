@@ -14,7 +14,7 @@ export class ProductService {
     unit?: string;
     categoryId?: string | null;
     variationLabel?: string;
-    variants?: { name: string; quantity: number }[];
+    variants?: { name: string; quantity: number; price?: number }[];
   }): Promise<Product> {
     const variants = (input.variants ?? [])
       .filter((v) => v.name.trim().length > 0)
@@ -37,9 +37,21 @@ export class ProductService {
     return product;
   }
 
-  async addVariant(productId: string, input: { name: string; quantity: number }): Promise<Product> {
+  async addVariant(
+    productId: string,
+    input: { name: string; quantity: number; price?: number }
+  ): Promise<Product> {
     const product = await this.getOrThrow(productId);
     product.addVariant(ProductVariant.create(input));
+    await this.repository.save(product);
+    return product;
+  }
+
+  async setVariantPrice(productId: string, variantId: string, price: number): Promise<Product> {
+    const product = await this.getOrThrow(productId);
+    const variant = product.findVariant(variantId);
+    if (!variant) throw new Error("Variação não encontrada");
+    variant.setPrice(price);
     await this.repository.save(product);
     return product;
   }

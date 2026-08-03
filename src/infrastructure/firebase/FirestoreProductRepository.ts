@@ -37,8 +37,12 @@ export class FirestoreProductRepository implements ProductRepository {
 
   private toDomain(id: string, data: DocumentData): Product {
     const variants = (data.variants ?? []).map(
-      (v: { id: string; name: string; quantity: number; sku?: string | null }) =>
-        ProductVariant.create({ name: v.name, quantity: v.quantity, sku: v.sku ?? undefined }, v.id)
+      (v: { id: string; name: string; quantity: number; sku?: string | null; price?: number | null }) =>
+        ProductVariant.create(
+          // Docs antigos (pré-preço) não têm price → 0.
+          { name: v.name, quantity: v.quantity, sku: v.sku ?? undefined, price: v.price ?? 0 },
+          v.id
+        )
     );
     return Product.reconstruct(
       {
