@@ -14,8 +14,8 @@ export function NotaClient({ sale }: { sale: SaleJSON }) {
     <main className="mx-auto max-w-md px-4 py-6 sm:py-10">
       {/* Ações — escondidas na impressão */}
       <div className="mb-4 flex items-center justify-between print:hidden">
-        <Link href="/pdv" className="text-sm font-medium text-blue-600 hover:underline">
-          ← Novo pedido
+        <Link href="/vendas" className="text-sm font-medium text-blue-600 hover:underline">
+          ← Menu de Vendas
         </Link>
         <Button onClick={() => window.print()}>Imprimir</Button>
       </div>

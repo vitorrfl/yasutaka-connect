@@ -11,7 +11,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { formatBRL, parseBRLToCents, centsToInput } from "@/lib/money";
 import { SaleType } from "@/domain/entities/Sale";
 import type { ProductJSON } from "@/domain/entities/Product";
-import { createSaleAction } from "./actions";
+import { createSaleAction } from "../actions";
 
 const LOW_STOCK = 5;
 
@@ -89,9 +89,15 @@ function ChevronIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-export function PdvClient({ products }: { products: ProductJSON[] }) {
+export function NovaVendaClient({
+  products,
+  initialType = SaleType.VENDA,
+}: {
+  products: ProductJSON[];
+  initialType?: SaleType;
+}) {
   const router = useRouter();
-  const [type, setType] = useState<SaleType>(SaleType.VENDA);
+  const [type, setType] = useState<SaleType>(initialType);
   const [customerName, setCustomerName] = useState("Cliente Diversos");
   const [sellerName, setSellerName] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -266,10 +272,8 @@ export function PdvClient({ products }: { products: ProductJSON[] }) {
   function finalize() {
     setError(null);
     if (cart.length === 0) return;
-    if (stockIssue) {
-      setError("Há itens com quantidade acima do estoque disponível.");
-      return;
-    }
+    // Itens acima do estoque são permitidos — o backend simplesmente não baixa
+    // o estoque deles. Sem bloqueio aqui, só o aviso visual na tela.
     const items = cart.map((l) => ({
       productId: l.productId,
       variantId: l.variantId,
@@ -286,7 +290,7 @@ export function PdvClient({ products }: { products: ProductJSON[] }) {
           sellerName: sellerName.trim() || undefined,
           freight: freightCents,
         });
-        router.push(`/pdv/nota/${id}`);
+        router.push(`/vendas/nota/${id}`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Não foi possível finalizar o pedido.");
       }
@@ -404,7 +408,7 @@ export function PdvClient({ products }: { products: ProductJSON[] }) {
                     <div className="text-xs text-slate-500">
                       {String(l.quantity).replace(".", ",")} × {formatBRL(l.unitPriceCents)}
                       {l.discountCents > 0 && <span className="text-emerald-600"> − {formatBRL(l.discountCents)}</span>}
-                      {over && <span className="text-red-600"> · acima do estoque ({l.stock})</span>}
+                      {over && <span className="text-amber-600"> · sem baixa (estoque {l.stock})</span>}
                     </div>
                   </button>
                   <div className="shrink-0 text-right text-sm font-semibold text-slate-900 tabular-nums">
@@ -425,6 +429,11 @@ export function PdvClient({ products }: { products: ProductJSON[] }) {
         )}
       </div>
 
+        {stockIssue && (
+          <p className="rounded-md bg-amber-50 px-4 py-2 text-sm text-amber-700">
+            Há itens acima do estoque. Eles serão vendidos normalmente, mas a baixa no estoque deles não será registrada.
+          </p>
+        )}
         {error && <p className="rounded-md bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>}
       </div>
 
@@ -472,7 +481,7 @@ export function PdvClient({ products }: { products: ProductJSON[] }) {
       {/* Modal: busca de produtos */}
       <Modal isOpen={searchOpen} onClose={() => setSearchOpen(false)} title="Pesquisar produto">
         <div className="flex flex-col gap-3">
-          <SearchField value={query} onChange={setQuery} placeholder="Buscar produto…" defaultOpen />
+          <SearchField value={query} onChange={setQuery} placeholder="Buscar produto…" />
           <ul className="max-h-[50vh] divide-y divide-slate-100 overflow-y-auto rounded-md border border-slate-200">
             {results.length === 0 ? (
               <li className="px-4 py-6 text-center text-sm text-slate-400">Nenhum produto encontrado</li>
