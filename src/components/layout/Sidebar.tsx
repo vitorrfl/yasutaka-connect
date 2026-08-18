@@ -3,7 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useSyncExternalStore, type SVGProps } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { Button } from "@/components/ui/Button";
+import { GlassBar } from "@/components/ui/GlassBar";
+import { ChevronIcon, CloseIcon, CollapseIcon, MenuIcon } from "@/components/ui/icons";
+import { NAV_GROUPS, isGroupActive } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const COLLAPSED_KEY = "yasutaka:sidebar-collapsed";
@@ -27,128 +31,22 @@ function setCollapsedPreference(value: boolean) {
   window.dispatchEvent(new Event(COLLAPSED_EVENT));
 }
 
-function EstoqueIcon(props: SVGProps<SVGSVGElement>) {
+/** `tone` existe porque a marca aparece sobre duas superficies: o navy da
+ *  sidebar/drawer (texto branco) e o vidro da barra mobile (texto escuro). */
+function Brand({ collapsed, tone = "dark" }: { collapsed?: boolean; tone?: "dark" | "light" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3" y="4" width="18" height="4" rx="1" />
-      <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" />
-      <path d="M10 12h4" />
-    </svg>
-  );
-}
-
-function CentralIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3" y="3" width="8" height="8" rx="1" />
-      <rect x="13" y="3" width="8" height="8" rx="1" />
-      <rect x="3" y="13" width="8" height="8" rx="1" />
-      <rect x="13" y="13" width="8" height="8" rx="1" />
-    </svg>
-  );
-}
-
-function MateriaPrimaIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M21 8L12 3 3 8v8l9 5 9-5V8z" />
-      <path d="M3 8l9 5 9-5M12 13v8" />
-    </svg>
-  );
-}
-
-function ProdutosIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M20.59 13.41L13 21l-9-9V4h8l8.59 8.41a2 2 0 0 1 0 2.83z" />
-      <circle cx="7.5" cy="7.5" r="1.25" />
-    </svg>
-  );
-}
-
-function MovimentacoesIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M7 17V7M7 7l-3 3M7 7l3 3" />
-      <path d="M17 7v10M17 17l-3-3M17 17l3-3" />
-    </svg>
-  );
-}
-
-function VendasIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M3 3h2l2.4 12.5a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 7H6" />
-      <circle cx="9" cy="20" r="1" />
-      <circle cx="18" cy="20" r="1" />
-    </svg>
-  );
-}
-
-function NovaVendaIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" />
-      <path d="M12 12v6M9 15h6" />
-    </svg>
-  );
-}
-
-function ChevronIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M9 6l6 6-6 6" />
-    </svg>
-  );
-}
-
-function CollapseIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <path d="M9 4v16" />
-      <path d="M13.5 10l2 2-2 2" />
-    </svg>
-  );
-}
-
-interface NavGroup {
-  label: string;
-  icon: (props: SVGProps<SVGSVGElement>) => React.JSX.Element;
-  items: { href: string; label: string; icon: (props: SVGProps<SVGSVGElement>) => React.JSX.Element }[];
-}
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: "Vendas",
-    icon: VendasIcon,
-    items: [
-      { href: "/vendas", label: "Menu de Vendas", icon: CentralIcon },
-      { href: "/vendas/nova", label: "Nova venda", icon: NovaVendaIcon },
-    ],
-  },
-  {
-    label: "Estoque",
-    icon: EstoqueIcon,
-    items: [
-      { href: "/estoque", label: "Central de Estoque", icon: CentralIcon },
-      { href: "/estoque/produtos", label: "Produtos", icon: ProdutosIcon },
-      { href: "/estoque/materia-prima", label: "Matéria Prima", icon: MateriaPrimaIcon },
-      { href: "/estoque/movimentacoes", label: "Movimentações", icon: MovimentacoesIcon },
-    ],
-  },
-];
-
-function isGroupActive(group: NavGroup, pathname: string) {
-  return group.items.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
-}
-
-function Brand({ collapsed }: { collapsed?: boolean }) {
-  return (
-    <span className="flex items-center gap-2">
+    <span className="flex min-w-0 items-center gap-2">
       <Image src="/logo.jpg" alt="" width={32} height={32} className="shrink-0 rounded-full" />
-      {!collapsed && <span className="text-base font-semibold tracking-tight text-white">Yasutaka Connect</span>}
+      {!collapsed && (
+        <span
+          className={cn(
+            "truncate text-base font-semibold tracking-tight",
+            tone === "light" ? "text-slate-900" : "text-white"
+          )}
+        >
+          Yasutaka Connect
+        </span>
+      )}
     </span>
   );
 }
@@ -258,19 +156,24 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Barra superior — só no mobile */}
-      <header className="flex h-14 items-center justify-between bg-slate-900 px-4 md:hidden print:hidden">
-        <Brand />
-        <button
-          type="button"
+      {/* Barra superior — só no mobile.
+          Mesma gramática da TabBar: cápsula de vidro agrupando a identidade +
+          botão circular solto pra ação. `sticky` mantém a barra no fluxo (o
+          conteúdo já começa abaixo dela) e a faz pairar sobre o que rola. */}
+      <header className="sticky top-0 z-40 flex items-center justify-between gap-2 px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:hidden print:hidden">
+        <GlassBar className="min-w-0 gap-2 p-2 pr-4">
+          <Brand tone="light" />
+        </GlassBar>
+        <Button
+          variant="glass"
+          shape="circle"
+          size="lg"
           aria-label="Abrir menu"
           onClick={() => setMobileOpen(true)}
-          className="rounded-md p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="shrink-0"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+          <MenuIcon width={20} height={20} />
+        </Button>
       </header>
 
       {/* Drawer mobile */}
@@ -296,20 +199,14 @@ export function Sidebar() {
               onClick={closeDrawer}
               className="group rounded-md p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
+              <CloseIcon
+                width={20}
+                height={20}
                 className={cn(
                   "transition-transform duration-150 group-hover:rotate-45",
                   closingIcon ? "rotate-45" : "rotate-0"
                 )}
-              >
-                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              />
             </button>
           </div>
           <GroupNav pathname={pathname} onNavigate={() => setMobileOpen(false)} />
