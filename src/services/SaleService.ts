@@ -59,15 +59,21 @@ export class SaleService {
       }
     }
 
-    // Monta snapshots dos itens; em VENDA, valida + baixa estoque em memória.
+    // Monta snapshots dos itens. Em VENDA, baixa o estoque só de quem tem
+    // saldo suficiente — itens acima do estoque (ex.: serviços sem controle)
+    // são vendidos mesmo assim, sem baixa e sem movimentação (não fica negativo).
+    const changedProducts = new Set<string>();
+    const movements: { productId: string; variantId: string; quantity: number }[] = [];
     const saleItemInputs = input.items.map((item) => {
       const product = products.get(item.productId)!;
       const variant = product.findVariant(item.variantId);
       if (!variant) throw new Error("Variação não encontrada");
       if (item.quantity <= 0) throw new Error("Quantidade do item deve ser positiva");
 
-      if (!isQuote) {
-        variant.decrement(item.quantity); // lança se estoque insuficiente
+      if (!isQuote && variant.quantity >= item.quantity) {
+        variant.decrement(item.quantity);
+        changedProducts.add(product.id);
+        movements.push({ productId: product.id, variantId: variant.id, quantity: item.quantity });
       }
 
       return {
@@ -93,21 +99,20 @@ export class SaleService {
       note: input.note,
     });
 
-    // Persistência (após toda a validação). Orçamento não mexe em estoque.
-    if (!isQuote) {
-      for (const product of products.values()) {
-        await this.productRepository.save(product);
-      }
-      for (const item of sale.items) {
-        const movement = StockMovement.create({
-          productId: item.productId,
-          variantId: item.variantId,
-          type: StockMovementType.SAIDA,
-          quantity: item.quantity,
-          reason: `Venda #${sale.number}`,
-        });
-        await this.movementRepository.save(movement);
-      }
+    // Persistência (após toda a validação). Grava só os produtos que baixaram
+    // estoque e registra uma SAÍDA apenas por item efetivamente baixado.
+    for (const product of products.values()) {
+      if (changedProducts.has(product.id)) await this.productRepository.save(product);
+    }
+    for (const m of movements) {
+      const movement = StockMovement.create({
+        productId: m.productId,
+        variantId: m.variantId,
+        type: StockMovementType.SAIDA,
+        quantity: m.quantity,
+        reason: `Venda #${sale.number}`,
+      });
+      await this.movementRepository.save(movement);
     }
     await this.saleRepository.save(sale);
 
