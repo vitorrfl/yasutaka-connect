@@ -1,5 +1,28 @@
 "use client";
 
+/* eslint-disable react-hooks/refs, react-hooks/set-state-in-effect --
+ *
+ * Duas exceções conscientes neste arquivo, ambas por causa da animação de
+ * saída. Desligadas no arquivo inteiro, e não em 5 pontos espalhados pelo
+ * JSX, porque a justificativa é uma só e fica legível aqui.
+ *
+ * 1. react-hooks/refs — o último conteúdo é guardado num ref pra o painel não
+ *    ficar em branco durante a saída (o pai limpa o estado no instante em que
+ *    chama onClose). Escrita e leitura acontecem no MESMO render, então o
+ *    valor nunca fica defasado. Migrar pra useState + useEffect deixaria o
+ *    conteúdo um render atrás do prop — e como este Modal hospeda formulários
+ *    controlados (produtos, matéria-prima), isso vira lag visível ao digitar.
+ *    A regra protege contra render descartado pelo modo concorrente: risco
+ *    real, porém menor que travar a digitação.
+ *
+ * 2. react-hooks/set-state-in-effect — montar/desmontar em resposta a `isOpen`
+ *    é o que mantém o portal vivo durante a saída. O render em cascata é o
+ *    mecanismo, não um acidente: sem ele o modal some instantaneamente e a
+ *    convenção de animar as duas direções (AGENTS.md) se perde.
+ *
+ * Revisar se o React Compiler entrar no projeto.
+ */
+
 import { ReactNode, useEffect, useRef, useState, type SVGProps } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -41,8 +64,8 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
   const [visible, setVisible] = useState(false);
   const [closingIcon, setClosingIcon] = useState(false);
 
-  // Keep the last content around while closing so the panel doesn't go blank
-  // mid-exit (parent often clears its state the instant it calls onClose).
+  // Mantém o último conteúdo enquanto fecha, pra o painel não ficar em branco
+  // no meio da saída (ver nota sobre react-hooks/refs no topo do arquivo).
   const contentRef = useRef<{ title?: string; children: ReactNode }>({ title, children });
   if (isOpen) contentRef.current = { title, children };
 
