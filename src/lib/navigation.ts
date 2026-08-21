@@ -52,16 +52,19 @@ export const NAV_GROUPS: NavGroup[] = [
 ];
 
 /**
- * Destinos da tab bar mobile. Recorte proposital: a HIG da Apple recomenda
- * 3–5 abas, e a NN/g aponta que espremer mais que isso degrada a precisão do
- * toque. "Matéria Prima" fica de fora das abas e continua acessível pelo hub
- * `/estoque` e pelo drawer.
+ * Destinos da tab bar mobile — 5, o teto que a HIG da Apple recomenda.
+ *
+ * Rótulos propositalmente mais curtos que os da sidebar: num iPhone 8 (375px)
+ * sobram ~59px por aba depois de descontar o acessório e os espaçamentos, e
+ * "Matéria Prima" ou "Movimentações" seriam truncados no meio. A tab bar tem
+ * sua própria lista justamente pra poder encurtar sem mexer no menu completo.
  */
 export const TAB_ITEMS: NavItem[] = [
   { href: "/vendas", label: "Vendas", icon: VendasIcon },
   { href: "/estoque", label: "Estoque", icon: EstoqueIcon },
   { href: "/estoque/produtos", label: "Produtos", icon: ProdutosIcon },
-  { href: "/estoque/movimentacoes", label: "Movimentações", icon: MovimentacoesIcon },
+  { href: "/estoque/materia-prima", label: "Matéria", icon: MateriaPrimaIcon },
+  { href: "/estoque/movimentacoes", label: "Movim.", icon: MovimentacoesIcon },
 ];
 
 /**

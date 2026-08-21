@@ -51,16 +51,42 @@ function Brand({ collapsed, tone = "dark" }: { collapsed?: boolean; tone?: "dark
   );
 }
 
+/**
+ * A navegação aparece sobre duas superfícies: o navy da sidebar no desktop e o
+ * vidro do drawer no mobile. Em vez de cravar cor no JSX (o que obrigaria a
+ * duplicar o GroupNav), cada tom declara seu conjunto aqui.
+ *
+ * A faixa azul do item ativo é igual nos dois: é o acento da sidebar, e o
+ * AGENTS.md pede que ela continue blue-600.
+ */
+const NAV_TONE = {
+  dark: {
+    item: "text-slate-400 hover:bg-slate-800 hover:text-white",
+    active: "border-blue-600 bg-slate-800 text-white",
+    guia: "border-slate-800",
+  },
+  light: {
+    item: "text-slate-500 hover:bg-slate-900/5 hover:text-slate-900",
+    active: "border-blue-600 bg-slate-900 text-white",
+    guia: "border-slate-300",
+  },
+} as const;
+
+type NavTone = keyof typeof NAV_TONE;
+
 function GroupNav({
   pathname,
   collapsed,
   onNavigate,
+  tone = "dark",
 }: {
   pathname: string;
   collapsed?: boolean;
   onNavigate?: () => void;
+  tone?: NavTone;
 }) {
   const [manualExpanded, setManualExpanded] = useState<Record<string, boolean>>({});
+  const cores = NAV_TONE[tone];
 
   return (
     <nav className="flex flex-col gap-1 px-3">
@@ -76,8 +102,9 @@ function GroupNav({
               href={group.items[0].href}
               title={group.label}
               className={cn(
-                "flex items-center justify-center rounded-md border-l-4 border-transparent px-3 py-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white",
-                active && "border-blue-600 bg-slate-800 text-white"
+                "flex items-center justify-center rounded-md border-l-4 border-transparent px-3 py-2 transition-colors",
+                cores.item,
+                active && cores.active
               )}
             >
               <GroupIcon width={18} height={18} className="shrink-0" />
@@ -90,7 +117,10 @@ function GroupNav({
             <button
               type="button"
               onClick={() => setManualExpanded((prev) => ({ ...prev, [group.label]: !expanded }))}
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className={cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                cores.item
+              )}
             >
               <GroupIcon width={18} height={18} className="shrink-0" />
               <span className="flex-1 text-left">{group.label}</span>
@@ -107,7 +137,7 @@ function GroupNav({
               )}
             >
               <div className="overflow-hidden">
-                <div className="mt-1 flex flex-col gap-1 border-l border-slate-800 pl-3">
+                <div className={cn("mt-1 flex flex-col gap-1 border-l pl-3", cores.guia)}>
                   {group.items.map((item) => {
                     const isActive = pathname === item.href;
                     const ItemIcon = item.icon;
@@ -117,8 +147,9 @@ function GroupNav({
                         href={item.href}
                         onClick={onNavigate}
                         className={cn(
-                          "flex items-center gap-3 rounded-md border-l-4 border-transparent px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white",
-                          isActive && "border-blue-600 bg-slate-800 text-white"
+                          "flex items-center gap-3 rounded-md border-l-4 border-transparent px-3 py-2 text-sm font-medium transition-colors",
+                          cores.item,
+                          isActive && cores.active
                         )}
                       >
                         <ItemIcon width={16} height={16} className="shrink-0" />
@@ -187,17 +218,21 @@ export function Sidebar() {
         <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
         <div
           className={cn(
-            "relative flex h-full w-64 flex-col overflow-y-auto bg-slate-900 transition-transform duration-200 ease-out",
+            // glass-strong (mais opaco) porque aqui há texto pequeno por cima:
+            // o vidro padrão é translúcido demais pra rótulo de menu.
+            // Cantos e bordas laterais zerados — é um painel colado na borda,
+            // não uma cápsula flutuante.
+            "glass glass-strong relative flex h-full w-64 flex-col overflow-y-auto rounded-none border-y-0 border-l-0 transition-transform duration-200 ease-out",
             mobileOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
           <div className="flex items-center justify-between px-5 py-4">
-            <Brand />
+            <Brand tone="light" />
             <button
               type="button"
               aria-label="Fechar menu"
               onClick={closeDrawer}
-              className="group rounded-md p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
+              className="group rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-900/5 hover:text-slate-900"
             >
               <CloseIcon
                 width={20}
@@ -209,7 +244,7 @@ export function Sidebar() {
               />
             </button>
           </div>
-          <GroupNav pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+          <GroupNav pathname={pathname} tone="light" onNavigate={() => setMobileOpen(false)} />
         </div>
       </div>
 

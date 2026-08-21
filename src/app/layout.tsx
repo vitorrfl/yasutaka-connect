@@ -26,10 +26,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * `maximumScale`/`userScalable` travam o pinch-zoom, que estava quebrando o
- * layout no celular. Ressalva honesta: o Safari comum IGNORA isso desde o
- * iOS 10 — lá o que resolve de fato é instalar como PWA (`display: standalone`
- * no manifest). No Android o Chrome respeita.
+ * O pinch-zoom fica LIVRE de propósito: travá-lo contraria a WCAG 1.4.4, que
+ * exige ampliação até 200%. Quem instala como PWA já não tem zoom do
+ * navegador (`display: standalone` no manifest resolve na prática), então a
+ * trava só penalizava quem usa pelo navegador — inclusive quem precisa dela.
  *
  * `viewportFit: "cover"` estende o app até as bordas; por isso o header e a
  * TabBar usam `env(safe-area-inset-*)` pra não ficar sob o notch/indicador.
@@ -37,8 +37,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: "#0f172a",
 };
