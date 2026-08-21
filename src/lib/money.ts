@@ -24,6 +24,10 @@ export function formatBRL(cents: number): string {
 export function parseBRLToCents(input: string): number {
   const s = String(input ?? "").trim();
   if (!s) return 0;
+  // O sinal precisa ser barrado ANTES da limpeza: o filtro lá embaixo remove
+  // tudo que não é dígito ou ponto — inclusive o "-" — então a checagem
+  // `value < 0` nunca dispararia e "-10,00" viraria 1000 silenciosamente.
+  if (s.startsWith("-")) return 0;
   // Com vírgula → BR: ponto é milhar, vírgula é decimal. Sem vírgula → ponto é decimal.
   const normalized = s.includes(",") ? s.replace(/\./g, "").replace(",", ".") : s;
   const cleaned = normalized.replace(/[^\d.]/g, "");
